@@ -35,7 +35,6 @@ class UserProfileAPIView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     lookup_field = 'user__id'
 
-# Other API views go here...
 
 class TweetLikeToggleAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -48,4 +47,3 @@ class TweetLikeToggleAPIView(APIView):
             tweet.likes.add(request.user)
         return Response({"message": "Like toggled successfully"}, status=status.HTTP_200_OK)
 
-# Other API views go here...

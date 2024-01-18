@@ -1,5 +1,3 @@
-# Twitter app model.py
-
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
@@ -34,7 +32,6 @@ def create_profile(sender, instance, created, **kwargs):
     if created:
         user_profile = Profile(user=instance)
         user_profile.save()
-        # have the user follow themselves
         user_profile.follows.set([instance.profile.id])
         user_profile.save()
 
