@@ -1,22 +1,15 @@
 from django.contrib import admin
-from django.contrib.auth.admin import Group, User
-from .models import Profile,Tweet
-# unregister Groups
-admin.site.unregister(Group)
-#mix prfile with user
-class ProfileInline(admin.StackedInline):
-    model=Profile
-# extend User model
-class UserAdmin(admin.ModelAdmin):
-    model=User
-    #just display username fields on admin page
-    fields=["username"]
-    inlines=[ProfileInline]
+from django.contrib.auth import get_user_model
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import Group
+from .models import Profile, Tweet
 
-# unregister initial User
-admin.site.unregister(User)
-# register new User
-admin.site.register(User, UserAdmin)
+@admin.register(Tweet)
+class TweetAdmin(admin.ModelAdmin):
+    list_display = ['user','body','created_at']
+    list_filter = ['created_at']
 
-#regiter tweet
-admin.site.register(Tweet)
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ['user','date_modified']
+    list_filter = ['date_modified']

@@ -1,13 +1,11 @@
-from django.urls import path, include # new
-from . import views
+from django.urls import path
+from .views import TweetListAPIView, TweetCreateAPIView, ProfileListAPIView, UserProfileAPIView, TweetLikeToggleAPIView
 
 urlpatterns = [
-    path('', views.home, name="home"), # new
-    path('profile_list/', views.profile_list, name="profile_list"), # new
-    path('profile/<int:pk>/', views.profile, name="profile"), # new
-    path('login/', views.login_user, name="login"), # new
-    path('logout/', views.logout_user, name="logout"), # new
-    path('register/', views.register_user, name="register"), # new
-    path('update_user/', views.update_user, name="update_user"), # new
-    path('tweet_like/<int:pk>/', views.tweet_like, name="tweet_like"), # new
+    path('api/tweets/', TweetListAPIView.as_view(), name='tweet-list'),
+    path('api/tweets/create/', TweetCreateAPIView.as_view(), name='tweet-create'),
+    path('api/profiles/', ProfileListAPIView.as_view(), name='profile-list'),
+    path('api/profiles/<int:pk>/', UserProfileAPIView.as_view(), name='user-profile'),
+    path('api/tweets/<int:pk>/like/', TweetLikeToggleAPIView.as_view(), name='tweet-like-toggle'),
+    # Other API URLs go here...
 ]
