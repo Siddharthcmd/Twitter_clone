@@ -47,3 +47,34 @@ class TweetLikeToggleAPIView(APIView):
             tweet.likes.add(request.user)
         return Response({"message": "Like toggled successfully"}, status=status.HTTP_200_OK)
 
+class ProfileFollowToggleAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        profile = get_object_or_404(Profile, id=pk)
+        if profile.follows.filter(id=request.user.profile.id):
+            profile.follows.remove(request.user.profile)
+        else:
+            profile.follows.add(request.user.profile)
+        return Response({"message": "Follow toggled successfully"}, status=status.HTTP_200_OK)
+
+class ProfileFollowAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        profile = get_object_or_404(Profile, id=pk)
+        return Response({"follows": profile.follows.all().count(), "followed_by": profile.followed_by.all().count()}, status=status.HTTP_200_OK)
+
+class TweetDeleteAPIView(generics.DestroyAPIView):
+    queryset = Tweet.objects.all()
+    serializer_class = TweetSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'id'
+
+class TweetEditAPIView(generics.UpdateAPIView):
+    queryset = Tweet.objects.all()
+    serializer_class = TweetSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'id'
+
+
