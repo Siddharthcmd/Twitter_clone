@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 from .models import Profile, Tweet
 from .serializers import TweetSerializer, ProfileSerializer
 from django.contrib import messages
+from django.core.exceptions import PermissionDenied
 
 class TweetListAPIView(generics.ListAPIView):
     queryset = Tweet.objects.all().order_by('-created_at')
@@ -33,14 +34,14 @@ class UserProfileAPIView(generics.RetrieveAPIView):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
     permission_classes = [IsAuthenticated]
-    lookup_field = 'user__id'
+    lookup_field = 'user__username'
 
 
 class TweetLikeToggleAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
-        tweet = get_object_or_404(Tweet, id=pk)
+        tweet = get_object_or_404(Tweet, pk=pk)
         if tweet.likes.filter(id=request.user.id):
             tweet.likes.remove(request.user)
         else:
@@ -50,8 +51,8 @@ class TweetLikeToggleAPIView(APIView):
 class ProfileFollowToggleAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, pk):
-        profile = get_object_or_404(Profile, id=pk)
+    def post(self, request, username):
+        profile = get_object_or_404(Profile, user__username=username)
         if profile.follows.filter(id=request.user.profile.id):
             profile.follows.remove(request.user.profile)
         else:
@@ -61,20 +62,39 @@ class ProfileFollowToggleAPIView(APIView):
 class ProfileFollowAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, pk):
-        profile = get_object_or_404(Profile, id=pk)
+    def get(self, request, username):
+        profile = get_object_or_404(Profile, user__username=username)
         return Response({"follows": profile.follows.all().count(), "followed_by": profile.followed_by.all().count()}, status=status.HTTP_200_OK)
 
 class TweetDeleteAPIView(generics.DestroyAPIView):
-    queryset = Tweet.objects.all()
     serializer_class = TweetSerializer
     permission_classes = [IsAuthenticated]
-    lookup_field = 'id'
+
+    def get_queryset(self):
+        return Tweet.objects.filter(user=self.request.user)
+
+    def perform_destroy(self, instance):
+        # Check if the user making the request is the owner of the tweet
+        if instance.user != self.request.user:
+            raise PermissionDenied("You do not have permission to delete this tweet.")
+        
+        instance.delete()
+        return Response({"message": "Tweet deleted successfully"}, status=status.HTTP_200_OK)
 
 class TweetEditAPIView(generics.UpdateAPIView):
-    queryset = Tweet.objects.all()
     serializer_class = TweetSerializer
     permission_classes = [IsAuthenticated]
-    lookup_field = 'id'
+
+    def get_queryset(self):
+        return Tweet.objects.filter(user=self.request.user)
+
+    def perform_update(self, serializer):
+        tweet = self.get_object()
+
+        # Check if the user making the request is the owner of the tweet
+        if tweet.user != self.request.user:
+            raise PermissionDenied("You do not have permission to edit this tweet.")
+
+        serializer.save()
 
 

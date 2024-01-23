@@ -50,7 +50,7 @@ ROOT_URLCONF = 'Social.urls'
 
 AUTH_USER_MODEL = 'Auth.User'
 
-SIMPLE_JWT = {"ACCESS_TOKEN_LIFETIME":timedelta(minutes=5),
+SIMPLE_JWT = {"ACCESS_TOKEN_LIFETIME":timedelta(minutes=15),
               "REFRESH_TOKEN_LIFETIME":timedelta(days=1),
               "SIGNING_KEY":SECRET_KEY,
               "AUTH_HEADER_TYPES":("Bearer",),}
