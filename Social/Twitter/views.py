@@ -36,7 +36,6 @@ class UserProfileAPIView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     lookup_field = 'user__username'
 
-
 class TweetLikeToggleAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
